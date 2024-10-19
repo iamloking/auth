@@ -36,10 +36,9 @@ public class AuthService {
     user.setUsername(request.username());
     user.setPassword(passwordEncoder.encode(request.password()));
     List<Roles> roles = new ArrayList<>();
-    Roles userRole = rolesRepository.findByName("user").get();
     roles.add(
         rolesRepository
-            .findByName("user")
+            .findByName(request.roleName().name())
             .orElseThrow(() -> new RoleNotFoundException("Invalid Role")));
     user.setRoles(roles);
     usersRepository.save(user);

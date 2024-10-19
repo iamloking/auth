@@ -1,5 +1,6 @@
 package com.lokidev.auth.security;
 
+import com.lokidev.auth.models.RoleName;
 import com.lokidev.auth.service.CustomUsersDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,6 +42,12 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers("/api/auth/**")
                     .permitAll() // Allow access to specific public API endpoints
+                    .requestMatchers("/api/dummy/hello")
+                    .hasAnyRole(
+                        RoleName.USER.name(),
+                        RoleName.ADMIN.name()) // USER and ADMIN can access /hello
+                    .requestMatchers("/api/dummy/adios")
+                    .hasRole(RoleName.ADMIN.name()) // Only ADMIN can access /adios
                     .anyRequest()
                     .authenticated() // Require authentication for all other endpoints
             );
@@ -57,5 +65,10 @@ public class SecurityConfig {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  public GrantedAuthorityDefaults grantedAuthorityDefaults() {
+    return new GrantedAuthorityDefaults(""); // Remove the "ROLE_" prefix
   }
 }
